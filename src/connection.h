@@ -22,6 +22,10 @@ public:
     static Connection& self();
     ~Connection();
 
+    bool scanForNetwork(const char *ssid);
+
+    void setupAP(const char *ssid, const char *password);
+
 private:
     Connection& operator = (Connection& other) = delete;
     Connection(const Connection& other) = delete;
@@ -29,4 +33,7 @@ private:
 
     ESP8266WiFiMulti* WiFiMulti;
     dataStruct* data;
+    bool rosca;
+
+    int netMode;
 };

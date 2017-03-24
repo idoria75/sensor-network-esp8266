@@ -2,13 +2,13 @@
 #include "connection.h"
 
 Connection::Connection() :
-    WiFiMulti(new ESP8266WiFiMulti), netMode(0), rosca(false)
+    WiFiMulti(new ESP8266WiFiMulti), isMaster(false), wifi_added(false)
 {
 }
 
-void Connection::addWifi(String ssid, String password = "")
+void Connection::addWifi(String ssid, String password = String())
 {
-    rosca = true;
+    wifi_added = true;
     if(password.length() != 0)
         WiFiMulti->addAP(ssid.c_str(), password.c_str());
     else
@@ -33,11 +33,10 @@ bool Connection::run()
     data->networkIP = wifi()->localIP().toString().c_str();
     data->RSSI = wifi()->RSSI();
     data->BSSID = wifi()->BSSIDstr().c_str();
-    netMode = 0;
-    if(rosca)
+    isMaster = false;
+    if(wifi_added)
         return getStatus();
-    else
-        return false;
+    return false;
 }
 
 void Connection::setData(dataStruct* d)
@@ -46,25 +45,18 @@ void Connection::setData(dataStruct* d)
 }
 
 bool Connection::scanForNetwork(const char *ssid){
-    int n = WiFi.scanNetworks();
+    int numRedes = WiFi.scanNetworks();
     debug("Scan Done");
-    if (n == 0)
-        Serial.println("no networks found");
-    else {
-        for (int i = 0; i < n; ++i){
+    if(numRedes != 0) {
+        for (int i = 0; i < numRedes; i++){
             if(WiFi.SSID(i) == ssid){
-                netMode = 1;
+                isMaster = 1;
             }
         }
     }
-    if(netMode == 1)
-        return true;
-    else
-        return false;
-}
-
-void setupAP(const char *ssid, const char *password){
-
+    if(isMaster)
+        return (true);
+    return false;
 }
 
 Connection& Connection::self()
